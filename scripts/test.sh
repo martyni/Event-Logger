@@ -19,7 +19,7 @@ python_test () {
   CURRENT_TEST=Python
   echo -e ${YELLOW} Starting Python Test ${NO_COLOUR}
   pgrep flask | xargs kill 2>/dev/null
-  flask --app=webapp.app:app run &
+  flask --app=eventlogger.app:app run &
   sleep 5
   curl -I localhost:5000/basic  
   curl  localhost:5000/basic  | jq .
@@ -30,7 +30,7 @@ linting_test () {
   CURRENT_TEST=Linting
   echo -e ${YELLOW} Starting Linting Test ${NO_COLOUR}
   autopep8 --recursive --in-place --aggressive --aggressive .
-  pylint $(git ls-files '*.py') || exit 1
+  pylint  --persistent=no $(git ls-files '*.py') || exit 1
 }
 
 build_test () {

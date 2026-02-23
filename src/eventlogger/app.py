@@ -3,13 +3,13 @@ import logging
 from os import environ, path
 from flask import Flask, request, jsonify
 import requests
-import webapp
-from webapp.models import Event, db
+import eventlogger
+from eventlogger.models import Event, db
 
 logger = logging.getLogger(__name__)
 
 conf_file = environ.get(
-    'WEBAPP_CONF') or f'{path.dirname(webapp.__file__)}/config.py'
+    'WEBAPP_CONF') or f'{path.dirname(eventlogger.__file__)}/config.py'
 print(conf_file)
 GOOD_DATA = {
     "user": "<user>",
@@ -103,4 +103,4 @@ app = create_app(conf_file)
 
 if __name__ == "__main__":
     app.run()
-    #app.run(debug=True) #For debugging local dev issues
+    # app.run(debug=True) #For debugging local dev issues
