@@ -1,4 +1,4 @@
-'''Basic flask app'''
+'''Event Logger models'''
 import uuid
 from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
@@ -6,22 +6,26 @@ from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
 
 
-class Basic(db.Model):  # pylint: disable=too-few-public-methods
-    '''Basic class to hold message data'''
+class Event(db.Model):  # pylint: disable=too-few-public-methods
+    '''Event class to hold event log data'''
     id = db.Column(db.String(36), primary_key=True,
                    default=lambda: str(uuid.uuid4()))
-    mandatory = db.Column(db.String(100), nullable=False)
-    optional = db.Column(db.Text, nullable=True)
-    date = db.Column(db.DateTime, default=datetime.utcnow)
+    time = db.Column(db.DateTime, default=datetime.utcnow)
+    user = db.Column(db.String(100), nullable=False)
+    message = db.Column(db.Text, nullable=False)
+    url = db.Column(db.Text, nullable=True)
+    platform = db.Column(db.String(100), nullable=True)
 
     def to_dict(self):
         '''Return sql data as dict'''
         return {
             "id": self.id,
-            "mandatory": self.mandatory,
-            "optional": self.optional,
-            "date": self.date.isoformat(),
+            "time": self.time.isoformat(),
+            "user": self.user,
+            "message": self.message,
+            "url": self.url,
+            "platform": self.platform,
         }
 
     def __repr__(self):
-        return f"<User {self.mandatory}><Date {self.date}>"
+        return f"<User {self.user}><Time {self.time}>"

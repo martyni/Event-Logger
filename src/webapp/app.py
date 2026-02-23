@@ -1,16 +1,43 @@
-'''Basic flask app'''
+'''Event Logger flask app'''
+import logging
 from os import environ, path
 from flask import Flask, request, jsonify
+import requests
 import webapp
-from webapp.models import Basic, db
+from webapp.models import Event, db
+
+logger = logging.getLogger(__name__)
 
 conf_file = environ.get(
     'WEBAPP_CONF') or f'{path.dirname(webapp.__file__)}/config.py'
 print(conf_file)
 GOOD_DATA = {
-    "mandatory": "<mandatory>",
-    "optional": "<optional(optional)>",
+    "user": "<user>",
+    "message": "<message>",
+    "url": "<url(optional)>",
+    "platform": "<platform(optional)>",
 }
+
+
+def relay_to_homeassistant(event_data):
+    '''Relay event to Home Assistant via its REST API'''
+    ha_url = environ.get('HA_URL')
+    ha_token = environ.get('HA_TOKEN')
+    if not ha_url or not ha_token:
+        return
+    try:
+        response = requests.post(
+            f'{ha_url}/api/events/event_logger',
+            headers={
+                'Authorization': f'Bearer {ha_token}',
+                'Content-Type': 'application/json',
+            },
+            json=event_data,
+            timeout=5,
+        )
+        response.raise_for_status()
+    except requests.exceptions.RequestException as exc:
+        logger.error('Home Assistant relay failed: %s', exc)
 
 
 def create_app(config_filename):
@@ -22,18 +49,13 @@ def create_app(config_filename):
     with new_app.app_context():
         db.create_all()
 
-    # from yourapplication.views.admin import admin
-    # from yourapplication.views.frontend import frontend
-    # app.register_blueprint(admin)
-    # app.register_blueprint(frontend)
-
-    @new_app.route('/basic', methods=['GET'])
+    @new_app.route('/event', methods=['GET'])
     def get_paginated_items():
-        '''Return paginated items based on page and per_page values'''
+        '''Return paginated event items based on page and per_page values'''
         page = int(request.args.get('page')) if request.args.get('page') else 1
         per_page = int(request.args.get('per_page')
                        ) if request.args.get('per_page') else 5
-        items = Basic.query.order_by(Basic.date.desc()) \
+        items = Event.query.order_by(Event.time.desc()) \
             .paginate(page=page,
                       per_page=per_page,
                       error_out=False)
@@ -42,28 +64,33 @@ def create_app(config_filename):
             "total": items.total,
             "page": items.page,
             "pages": items.pages,
-            "next_page": f'/basic?page={ page + 1 }&per_page={ per_page }'
+            "next_page": f'/event?page={ page + 1 }&per_page={ per_page }'
         }), 200
 
-    @new_app.route('/basic', methods=['POST'])
-    def receive_message():
-        '''URL for recieving items'''
+    @new_app.route('/event', methods=['POST'])
+    def receive_event():
+        '''URL for receiving event log entries'''
         data = request.get_json()
         print(data)
 
-        if not data or 'mandatory' not in data:
+        if not data or 'user' not in data or 'message' not in data:
             return jsonify({
                 'error': 'Invalid input',
-                'recieved': f'{data}',
+                'received': f'{data}',
                 'expected': f'{GOOD_DATA}'}), 400
 
-        new_item = Basic(
-            mandatory=data['mandatory'],
-            optional=data.get('optional'))
-        db.session.add(new_item)
+        new_event = Event(
+            user=data['user'],
+            message=data['message'],
+            url=data.get('url'),
+            platform=data.get('platform'))
+        db.session.add(new_event)
         db.session.commit()
 
-        return jsonify(new_item.to_dict()), 201
+        event_dict = new_event.to_dict()
+        relay_to_homeassistant(event_dict)
+
+        return jsonify(event_dict), 201
 
     @new_app.route('/')
     def root():
