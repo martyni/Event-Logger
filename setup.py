@@ -75,7 +75,7 @@ setup(
     # Scripts
     entry_points={
         'console_scripts': [
-            f"{meta_dict['name']}_web = webapp.app:main",
+            f"{meta_dict['name']}_web = eventlogger.app:main",
             f"{meta_dict['name']}   = myapp.app:main",
         ],
     },

@@ -3,7 +3,7 @@
 '''
 import random
 import string
-from webapp.app import app
+from eventlogger.app import app
 
 C = app.test_client()
 
