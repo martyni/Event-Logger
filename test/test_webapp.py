@@ -1,5 +1,5 @@
 '''
-   Default test for Boilerplate App
+   Tests for Event Logger App
 '''
 import random
 import string
@@ -8,45 +8,52 @@ from webapp.app import app
 C = app.test_client()
 
 
-# configure the SQLite database, relative to the app instance folder
-# initialize the app with the extension
-# db.init_app(app)
-
-
 def __random_string(length=32):
     '''Generates random string'''
     letters = string.ascii_lowercase
     return ''.join(random.choice(letters) for i in range(length))
 
 
-# def test_request_example(client=C):
-#    '''Checks basic field in response data'''
-#    test_json_returned()
-#    response = client.get("/basic")
-#    assert b"basic" in response.data
-#
-# def test_request_basic(client=C):
-#    '''Checks json formatting of basic'''
-#    test_json_returned()
-#    response = client.get("/basic")
-#    assert response.json["items"]
-#
-#
-# def test_request_json(client=C):
-#    '''Checks json formatting of basic'''
-#    test_json_returned()
-#    response = client.get("/basic")
-#    assert response.json["items"]
-#
-#
+def test_event_returned():
+    '''Sends random event data and ensures it is returned'''
+    rnd_user = __random_string()
+    rnd_message = __random_string()
+    response = C.post("/event",
+                      json={
+                          "user": rnd_user,
+                          "message": rnd_message})
+    assert response.status_code == 201
+    assert response.json["user"] == rnd_user
+    assert response.json["message"] == rnd_message
+    assert response.json["url"] is None
+    assert response.json["platform"] is None
+    response = C.get("/event")
+    assert rnd_user in str(response.data)
+    assert rnd_message in str(response.data)
 
-def test_json_returned(client=C):
-    '''Sends random basic data and ensures it is returned'''
-    rnd_str = __random_string()
-    response = client.post("/basic",
-                           json={
-                               "mandatory": rnd_str,
-                               "optional": "dave"})
-    assert response.json["mandatory"] == rnd_str
-    response = client.get("/basic")
-    assert rnd_str in str(response.data)
+
+def test_event_with_optional_fields():
+    '''Sends event data with optional fields and ensures they are returned'''
+    rnd_user = __random_string()
+    rnd_message = __random_string()
+    rnd_url = f'https://{__random_string(8)}.example.com'
+    rnd_platform = __random_string(8)
+    response = C.post("/event",
+                      json={
+                          "user": rnd_user,
+                          "message": rnd_message,
+                          "url": rnd_url,
+                          "platform": rnd_platform})
+    assert response.status_code == 201
+    assert response.json["user"] == rnd_user
+    assert response.json["message"] == rnd_message
+    assert response.json["url"] == rnd_url
+    assert response.json["platform"] == rnd_platform
+
+
+def test_invalid_event_rejected():
+    '''Sends invalid event data and ensures a 400 error is returned'''
+    response = C.post("/event", json={"user": "only_user"})
+    assert response.status_code == 400
+    response = C.post("/event", json={})
+    assert response.status_code == 400
