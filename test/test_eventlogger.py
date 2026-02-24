@@ -32,6 +32,25 @@ def test_event_returned():
     assert rnd_message in str(response.data)
 
 
+def test_twitch_event():
+    '''Sends event data with optional fields and ensures they are returned'''
+    rnd_user = "tobor"
+    rnd_message = "Special twitch message"
+    rnd_url = "https://twitch.tv/askmartyn"
+    rnd_platform = "twitch"
+    response = C.post("/event",
+                      json={
+                          "user": rnd_user,
+                          "message": rnd_message,
+                          "url": rnd_url,
+                          "platform": rnd_platform})
+    assert response.status_code == 201
+    assert response.json["user"] == "tobor"
+    assert response.json["message"] == "Special twitch message"
+    assert response.json["url"] == "https://twitch.tv/askmartyn"
+    assert response.json["platform"] == "twitch"
+
+
 def test_event_with_optional_fields():
     '''Sends event data with optional fields and ensures they are returned'''
     rnd_user = __random_string()

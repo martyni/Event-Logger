@@ -24,6 +24,13 @@ def relay_to_homeassistant(event_data):
     ha_url = environ.get('HA_URL')
     ha_token = environ.get('HA_TOKEN')
     if not ha_url or not ha_token:
+        logger.info(
+            'ha_url: %s', ha_url
+        )
+        logger.info(
+            'ha_token not set?:  %s', not ha_token
+        )
+
         return
     try:
         response = requests.post(
@@ -33,14 +40,14 @@ def relay_to_homeassistant(event_data):
                 'Content-Type': 'application/json',
             },
             json=event_data,
-            timeout=5,
+            timeout=10,
         )
         response.raise_for_status()
         logger.info(
             'Sent :%s \nURL: %s\nStatus: %s',
             event_data,
             ha_url,
-            response.status)
+            response.status_code)
     except requests.exceptions.RequestException as exc:
         logger.error('Home Assistant relay failed: %s', exc)
 

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash 
 source scripts/common.sh
 
 docker_build () {
@@ -32,8 +32,8 @@ sudo systemctl daemon-reload
 sudo systemctl enable ${NAME}
 sudo systemctl stop ${NAME}
 sudo systemctl start ${NAME}
-for i in {1..30}; do 
-    CURL="curl --verbose https://${NAME}.${DOMAIN}:${PORT}"
+for i in {1..15}; do 
+    CURL="curl --verbose --max-time $i  https://${NAME}.${DOMAIN}:${PORT}"
     echo ${CURL}
     sleep ${i}
     ${CURL} && break  
