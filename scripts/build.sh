@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 source scripts/common.sh
 
 docker_build () {
@@ -33,11 +33,13 @@ sudo systemctl enable ${NAME}
 sudo systemctl stop ${NAME}
 sudo systemctl start ${NAME}
 for i in {1..30}; do 
-    CURL="curl https://${NAME}.${DOMAIN}:${PORT}"
+    CURL="sudo curl --verbose https://${NAME}.${DOMAIN}:${PORT}"
     echo ${CURL}
-    ${CURL} && break  
     sleep ${i}
+    ${CURL} && break  
     echo "Sleeping ${i}"
+    sudo systemctl stop ${NAME}
+    sudo systemctl start ${NAME}
 done
 }
 

@@ -45,7 +45,6 @@ def create_app(config_filename):
     new_app = Flask(__name__)
     new_app.config.from_pyfile(config_filename, silent=False)
     db.init_app(new_app)
-    print(new_app.config)
     with new_app.app_context():
         db.create_all()
 
