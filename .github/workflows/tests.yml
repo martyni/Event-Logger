@@ -19,4 +19,4 @@ jobs:
         python -m pip install --upgrade pip
         pip install '.[dev]'
     - name: Running tests
-      run: export DB_NAME="sqlite:///test.db" pytest 
+      run: DB_NAME="sqlite:///test.db" pytest
