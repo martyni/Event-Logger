@@ -33,7 +33,7 @@ sudo systemctl enable ${NAME}
 sudo systemctl stop ${NAME}
 sudo systemctl start ${NAME}
 for i in {1..30}; do 
-    CURL="sudo curl --verbose https://${NAME}.${DOMAIN}:${PORT}"
+    CURL="curl --verbose https://${NAME}.${DOMAIN}:${PORT}"
     echo ${CURL}
     sleep ${i}
     ${CURL} && break  
