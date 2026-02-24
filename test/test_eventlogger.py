@@ -4,6 +4,7 @@
 import random
 import string
 from unittest.mock import patch, MagicMock
+import requests as req
 from eventlogger.app import app, relay_to_homeassistant
 
 C = app.test_client()
@@ -110,7 +111,6 @@ def test_ha_relay_sends_event():
 
 def test_ha_relay_handles_request_failure():
     '''relay_to_homeassistant logs error and does not raise on request failure'''
-    import requests as req
     with patch('eventlogger.app.requests.post',
                side_effect=req.exceptions.RequestException('connection error')):
         with patch('eventlogger.app.environ.get', side_effect=lambda k, *a: {
