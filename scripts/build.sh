@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 source scripts/common.sh
 
 docker_build () {
