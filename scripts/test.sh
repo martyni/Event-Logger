@@ -32,6 +32,7 @@ python_test () {
   flask --app=eventlogger.app:app run &
   sleep 1
   (curl -I --fail ${URL} || fail ) && (curl --fail ${URL}  | jq . || fail) && (pytest || fail && (pgrep flask | xargs kill))
+  source ~/.credentials && pytest || fail
 }
 
 linting_test () {
