@@ -9,7 +9,7 @@ else
     export YELLOW='\033[0;33m'
     export NO_COLOUR='\033[0m'
 fi
-
+source ~/.credentials
 export RUN_DIR=$(realpath $(dirname $0))
 export BUILD_EXIT_FILE=/tmp/build_exit_code
 export BUILD_OUTPUT=/tmp/build_output

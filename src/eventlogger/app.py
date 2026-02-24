@@ -36,6 +36,11 @@ def relay_to_homeassistant(event_data):
             timeout=5,
         )
         response.raise_for_status()
+        logger.info(
+            'Sent :%s \nURL: %s\nStatus: %s',
+            event_data,
+            ha_url,
+            response.status)
     except requests.exceptions.RequestException as exc:
         logger.error('Home Assistant relay failed: %s', exc)
 

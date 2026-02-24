@@ -6,8 +6,10 @@ date> ${OUTPUT_FILE}
 
 cd $ROOT_PROJECT_DIR || return
 source scripts/common.sh
-
+export PARENT_PROCESS=$$
 echo -e ${YELLOW}Running tests from  ${RUN_DIR}${NO_COLOUR}
+
+export FAIL=false
 
 python_install () {
   CURRENT_TEST=python_install
@@ -18,10 +20,9 @@ python_install () {
 
 fail () {
    if [[ ${CURRENT_TEST} ]]; then
-       echo fail ${CURRENT_TEST}
+       echo -e ${RED}Failed ${CURRENT_TEST} ${NO_COLOUR}
    fi
-   return 1
-   exit 1
+   kill  ${PARENT_PROCESS} 
 }
 python_test () {
   CURRENT_TEST=E2E Python
@@ -54,8 +55,12 @@ run_test () {
 }
 
 all_tests_pass () {
-  echo -e ${GREEN} All tests passed ${NO_COLOUR}
   ${RUN_DIR}/increment.sh && ${RUN_DIR}/build.sh || fail 
+  echo -e ${GREEN} All tests passed ${NO_COLOUR}
 }
 
-python_install && python_test && linting_test && build_test && run_test  || export CURRENT_TEST='' fail && all_tests_pass
+python_install \
+	&& python_test  || export CURRENT_TEST='' fail \
+	&& linting_test || export CURRENT_TEST='' fail \
+	&& build_test   || export CURRENT_TEST='' fail \
+	&& run_test     || export CURRENT_TEST='' fail && all_tests_pass
