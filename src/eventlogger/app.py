@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 conf_file = environ.get(
     'WEBAPP_CONF') or f'{path.dirname(eventlogger.__file__)}/config.py'
-print(conf_file)
+logger.info('Config file: %s', conf_file)
 GOOD_DATA = {
     "user": "<user>",
     "message": "<message>",
@@ -82,7 +82,7 @@ def create_app(config_filename):
     def receive_event():
         '''URL for receiving event log entries'''
         data = request.get_json()
-        print(data)
+        logger.debug('Received event data: %s', data)
 
         if not data or 'user' not in data or 'message' not in data:
             return jsonify({

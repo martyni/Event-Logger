@@ -1,6 +1,6 @@
 '''Event Logger models'''
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
@@ -10,7 +10,7 @@ class Event(db.Model):  # pylint: disable=too-few-public-methods
     '''Event class to hold event log data'''
     id = db.Column(db.String(36), primary_key=True,
                    default=lambda: str(uuid.uuid4()))
-    time = db.Column(db.DateTime, default=datetime.utcnow)
+    time = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     user = db.Column(db.String(100), nullable=False)
     message = db.Column(db.Text, nullable=False)
     url = db.Column(db.Text, nullable=True)
